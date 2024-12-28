@@ -1,17 +1,11 @@
 const express = require("express"); //
 const app = express(); //
+const {adminAuth, userAuth} = require("./middlewares/auth")
 
 
-app.use("/admin",(req,res,next)=>{
-    console.log('Check admin authorization');
-    const token = "xyz";
-    const isAdminAuthorized = token === "xyz";
-    if(!isAdminAuthorized){
-        res.status(401).send("Unauthorized Admin");
-    }else{
-        next();
-    }
-})
+app.use("/admin",adminAuth,userAuth);
+
+app.get("/user",userAuth,(req,res,next)=>res.send("user response"))
 app.get("/admin",(req,res,next)=>{
     res.send("Get users data")
 })
