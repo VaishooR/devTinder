@@ -5,19 +5,19 @@ const User = require("./models/user")
 
 
 
+// Middleware which converts data received from the client to json format
+app.use(express.json());
+
+
+
+// To add new users to db on signup
 app.post("/signup", async (req,res)=>{
-    const user = new User({
-        firstname : "Mommy",
-        lastname : "R",
-        email : "mom@gmail.com",
-        password : "mom",
-        age : 50,
-        gender : "female"
-    })
+    console.log(req.body)
+    const user = new User(req.body)
     
     try{
         await user.save();
-    res.send("User created successfully");
+        res.send("User created successfully");
     }
     catch(err){
         res.status(400).send("Error saving user");
@@ -26,6 +26,69 @@ app.post("/signup", async (req,res)=>{
 
 
 
+// To get all users in the feed
+app.get("/feed",async (req,res)=>{
+    try{
+        const users = await User.find({})
+        res.send(users)
+        console.log("Found all users in feed")
+    }catch(err){
+        res.status(400).send("Error in fetching users")
+    }
+})
+
+
+
+// To find a user
+app.get("/user",async (req,res)=>{
+    const userEmail = req.body.email
+    try{ 
+        const user =await User.find({email : userEmail})
+        if(user.length === 0){
+            res.send("No user found")
+        }else{
+            res.send(user)
+        }
+        console.log("User found")
+    }
+    catch(err){
+        res.status(400).send("No user found")
+    }
+})
+
+
+
+// To delete a user
+app.delete("/user",async (req,res)=>{
+    const userId = req.body.id
+    console.log(userId)
+    try{ 
+        const userToDelete = await User.findByIdAndDelete(userId)
+        console.log(userToDelete)
+        res.send(userToDelete)
+        console.log("User deleted successfully")
+    }catch(err){
+        res.status(400).send("Error deleting user")
+    }
+})
+
+
+
+// To edit a user
+app.patch("/user",async (req,res)=>{
+    const userId = req.body.id
+    try{
+        const userToEdit = await User.findByIdAndUpdate(userId,{firstname:"Mommy Mommy"})
+        res.send(userToEdit)
+        console.log("User edited successfully")
+    }
+    catch(err){
+        res.status(400).send("Error editing user")
+    }
+})
+
+
+// Connecting to DB first then server starts listening to requests
 connectDB().then(()=>{
     console.log("Database connected successfully...");
     app.listen(7777,()=>{
