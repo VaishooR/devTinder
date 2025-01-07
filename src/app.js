@@ -20,7 +20,7 @@ app.post("/signup", async (req,res)=>{
         res.send("User created successfully");
     }
     catch(err){
-        res.status(400).send("Error saving user");
+        res.status(400).send( err.message);
     }
 })
 
@@ -77,8 +77,9 @@ app.delete("/user",async (req,res)=>{
 // To edit a user
 app.patch("/user",async (req,res)=>{
     const userId = req.body.id
+    const data = req.body
     try{
-        const userToEdit = await User.findByIdAndUpdate(userId,{firstname:"Mommy Mommy"})
+        const userToEdit = await User.findByIdAndUpdate(userId,data,{runValidators:true})
         res.send(userToEdit)
         console.log("User edited successfully")
     }
