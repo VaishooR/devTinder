@@ -75,10 +75,18 @@ app.delete("/user",async (req,res)=>{
 
 
 // To edit a user
-app.patch("/user",async (req,res)=>{
-    const userId = req.body.id
+app.patch("/user/:id",async (req,res)=>{
+    const userId = req.params?.id
     const data = req.body
     try{
+        const allowedUpdateFields =[ "firstname","lastname","gender","age","skills","about","photoUrl"]
+        const isValidUpdateField = Object.keys(data).every((eachKey)=> allowedUpdateFields.includes(eachKey))
+        if(!isValidUpdateField){
+            return res.status(400).send("Invalid update field")
+        }
+        if(data.skills.length > 3){
+            throw new Error("Cannot have more than 3 skills")
+        }
         const userToEdit = await User.findByIdAndUpdate(userId,data,{runValidators:true})
         res.send(userToEdit)
         console.log("User edited successfully")
