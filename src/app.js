@@ -2,7 +2,8 @@ const express = require("express"); //
 const app = express(); //
 const connectDB = require('./config/database') //
 const User = require("./models/user")
-
+const {validateSignupUser} = require('./utils/validation')
+const bcrypt = require('bcrypt');
 
 
 // Middleware which converts data received from the client to json format
@@ -13,9 +14,21 @@ app.use(express.json());
 // To add new users to db on signup
 app.post("/signup", async (req,res)=>{
     console.log(req.body)
-    const user = new User(req.body)
+    const {firstname, lastname, email} = req.body
+    
+
+    const hashpw = await bcrypt.hash(req.body.password, 10)
+    console.log(req.body.password)
+    console.log(hashpw)
     
     try{
+        const user = new User({
+            firstname,
+            lastname,
+            email,
+            password : hashpw
+        })
+        validateSignupUser(req)
         await user.save();
         res.send("User created successfully");
     }
@@ -24,7 +37,25 @@ app.post("/signup", async (req,res)=>{
     }
 })
 
-
+// To login users
+app.post("/login",async (req,res)=>{
+    const {email,password} = req.body
+    try{
+        const user = await User.findOne({email:email})
+        if(!user){
+            throw new Error("Invalid credentials")
+        }
+        const checkPassword = await bcrypt.compare(password,user.password)
+        if(!checkPassword){
+            throw new Error("Invalid credentials")
+        } else{
+            res.send("Login successful")
+        }  
+    }
+    catch(err){
+        res.status(400).send(err.message)
+    }
+})
 
 // To get all users in the feed
 app.get("/feed",async (req,res)=>{
