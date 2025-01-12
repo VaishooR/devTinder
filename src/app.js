@@ -75,6 +75,13 @@ app.get("/profile",userAuth,async (req,res)=>{
     
 })
 
+// To send connection request
+app.post('/sendRequest',userAuth,async(req,res)=>{
+    const user = req.user
+    console.log(user.firstname + " sent a request")
+    res.send(user.firstname + " sent a request")
+})
+
 // To get all users in the feed
 app.get("/feed",async (req,res)=>{
     try{
