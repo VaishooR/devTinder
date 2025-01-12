@@ -4,10 +4,11 @@ const connectDB = require('./config/database') //
 const User = require("./models/user")
 const {validateSignupUser} = require('./utils/validation')
 const bcrypt = require('bcrypt');
-
+const cookieParser = require('cookie-parser')
 
 // Middleware which converts data received from the client to json format
 app.use(express.json());
+app.use(cookieParser());
 
 
 
@@ -49,12 +50,19 @@ app.post("/login",async (req,res)=>{
         if(!checkPassword){
             throw new Error("Invalid credentials")
         } else{
+            res.cookie("token","khfe58cfjk975gnhlpqaetycgr865")
             res.send("Login successful")
         }  
     }
     catch(err){
         res.status(400).send(err.message)
     }
+})
+
+app.get("/profile",async (req,res)=>{
+    const cookies = req.cookies;
+    console.log(cookies)
+    res.send("reading cookies")
 })
 
 // To get all users in the feed
