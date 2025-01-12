@@ -5,6 +5,7 @@ const User = require("./models/user")
 const {validateSignupUser} = require('./utils/validation')
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser')
+const jwt = require('jsonwebtoken');
 
 // Middleware which converts data received from the client to json format
 app.use(express.json());
@@ -50,7 +51,9 @@ app.post("/login",async (req,res)=>{
         if(!checkPassword){
             throw new Error("Invalid credentials")
         } else{
-            res.cookie("token","khfe58cfjk975gnhlpqaetycgr865")
+            const token = await jwt.sign({ _id: user._id }, 'Vaishoo@1995');
+            console.log(token)
+            res.cookie("token",token)
             res.send("Login successful")
         }  
     }
@@ -60,9 +63,26 @@ app.post("/login",async (req,res)=>{
 })
 
 app.get("/profile",async (req,res)=>{
-    const cookies = req.cookies;
-    console.log(cookies)
-    res.send("reading cookies")
+    try{
+        const cookies = req.cookies;
+        const {token} = cookies;
+        if(!token){
+            throw new Error("Invalid token")
+        }
+        const checkToken = jwt.verify(token, 'Vaishoo@1995')
+        const {_id} = checkToken
+        const findUser = await User.findById(_id)
+        if(!findUser){
+            throw new Error("User not found")
+        }
+        console.log("Logged in user is ...",findUser)
+        res.send(findUser)
+
+    }
+    catch(err){
+        res.status(400).send(err.message)
+    }
+    
 })
 
 // To get all users in the feed
