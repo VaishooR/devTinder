@@ -6,6 +6,7 @@ const {validateSignupUser} = require('./utils/validation')
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser')
 const jwt = require('jsonwebtoken');
+const {userAuth} = require('./middlewares/auth')
 
 // Middleware which converts data received from the client to json format
 app.use(express.json());
@@ -62,25 +63,14 @@ app.post("/login",async (req,res)=>{
     }
 })
 
-app.get("/profile",async (req,res)=>{
+app.get("/profile",userAuth,async (req,res)=>{
     try{
-        const cookies = req.cookies;
-        const {token} = cookies;
-        if(!token){
-            throw new Error("Invalid token")
-        }
-        const checkToken = jwt.verify(token, 'Vaishoo@1995')
-        const {_id} = checkToken
-        const findUser = await User.findById(_id)
-        if(!findUser){
-            throw new Error("User not found")
-        }
+        const findUser = req.user
         console.log("Logged in user is ...",findUser)
         res.send(findUser)
-
     }
     catch(err){
-        res.status(400).send(err.message)
+        res.status(400).send("ERROR " + err.message)
     }
     
 })
