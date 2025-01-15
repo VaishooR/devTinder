@@ -11,4 +11,10 @@ const validateSignupUser = (req) => {
     }
 }
 
-module.exports = {validateSignupUser}
+const validateUpdateData = (req) => {
+    const allowedUpdates = ["age","gender","skills","photoUrl","about","lastname"]
+    const validateUpdateData = Object.keys(req.body).every((key)=>allowedUpdates.includes(key))
+    return validateUpdateData
+}
+
+module.exports = {validateSignupUser,validateUpdateData}
